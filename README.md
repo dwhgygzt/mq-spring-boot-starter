@@ -8,7 +8,7 @@ pom.xml 文件引入如下配置
 <dependency>
     <groupId>com.middol</groupId>
     <artifactId>mq-spring-boot-starter</artifactId>
-    <version>公司阿里云maven仓库中最新版本号</version>
+    <version>1.0-SNAPSHOT</version>
 </dependency>
 
 <!-- 如果你使用的是阿里云RocketMq 请引入对应的SDK 因为本系统采用 provid策略 最低限度引入依赖的jar包 
@@ -16,6 +16,7 @@ pom.xml 文件引入如下配置
         <dependency>
             <groupId>com.aliyun.openservices</groupId>
             <artifactId>ons-client</artifactId>
+            <version>xxx</version>
         </dependency>
 -->
 
@@ -24,11 +25,13 @@ pom.xml 文件引入如下配置
        <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
+            <version>xxx</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-acl</artifactId>
+            <version>xxx</version>
         </dependency>
 -->
 
