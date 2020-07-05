@@ -6,8 +6,8 @@ pom.xml 文件引入如下配置
 ```xml
 <!-- 消息队列通用接口 -->
 <dependency>
-    <groupId>com.middol</groupId>
-    <artifactId>mq-spring-boot-starter</artifactId>
+    <groupId>com.guzt</groupId>
+    <artifactId>mymq-spring-boot-starter</artifactId>
     <version>1.0-SNAPSHOT</version>
 </dependency>
 
