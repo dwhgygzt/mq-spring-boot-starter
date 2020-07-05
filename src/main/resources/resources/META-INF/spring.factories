@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+                    com.middol.starter.mq.config.AliyunRocketMqAutoConfigure,\
+                    com.middol.starter.mq.config.ApacheRocketMqAutoConfigure
