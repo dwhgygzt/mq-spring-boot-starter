@@ -35,7 +35,7 @@ public class ApacheMqPubProperties {
     /**
      * 如果发送消息返回sendResult，但是sendStatus!=SEND_OK，是否重试发送
      */
-    private Boolean retryanotherbrokerwhennotstoreok;
+    private Boolean retryAnotherBrokerWhenNotStoreOK;
 
     /**
      * 如果消息发送失败，最大重试次数，该参数只对同步发送模式起作用 2
@@ -108,12 +108,12 @@ public class ApacheMqPubProperties {
         this.compressMsgBodyOverHowmuch = compressMsgBodyOverHowmuch;
     }
 
-    public Boolean getRetryanotherbrokerwhennotstoreok() {
-        return retryanotherbrokerwhennotstoreok;
+    public Boolean getRetryAnotherBrokerWhenNotStoreOK() {
+        return retryAnotherBrokerWhenNotStoreOK;
     }
 
-    public void setRetryanotherbrokerwhennotstoreok(Boolean retryanotherbrokerwhennotstoreok) {
-        this.retryanotherbrokerwhennotstoreok = retryanotherbrokerwhennotstoreok;
+    public void setRetryAnotherBrokerWhenNotStoreOK(Boolean retryAnotherBrokerWhenNotStoreOK) {
+        this.retryAnotherBrokerWhenNotStoreOK = retryAnotherBrokerWhenNotStoreOK;
     }
 
     public Integer getRetryTimesWhenSendFailed() {

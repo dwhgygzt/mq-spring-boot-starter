@@ -7,7 +7,7 @@ import java.util.Properties;
  *
  * @author <a href="mailto:guzhongtao@middol.com">guzhongtao</a>
  */
-public class TopicMessage implements Message {
+public class TopicMessage implements Message{
     private static final long serialVersionUID = 1L;
 
     /**

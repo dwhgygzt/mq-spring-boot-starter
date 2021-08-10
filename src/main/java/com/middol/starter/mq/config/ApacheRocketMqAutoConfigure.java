@@ -45,13 +45,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.*;
 
 /**
- * 核心配置类
+ * 开源Rocketmq核心配置类
  *
  * @author <a href="mailto:guzhongtao@middol.com">guzhongtao</a>
  */
@@ -69,12 +70,14 @@ public class ApacheRocketMqAutoConfigure implements InitializingBean {
     @Resource
     private ApplicationContext applicationContext;
 
+    /**
+     * 消息消费者
+     */
     @Autowired
     private Map<String, TopicListener> listenerMap = new ConcurrentHashMap<>(4);
 
     @Autowired
     private Map<String, XaTopicLocalTransactionExecuter> executerMap = new ConcurrentHashMap<>(2);
-
 
     @Bean
     @ConditionalOnMissingBean
@@ -84,12 +87,12 @@ public class ApacheRocketMqAutoConfigure implements InitializingBean {
 
     @Bean
     @ConditionalOnMissingBean
-    public XaTopicLocalTransactionExecuter defaultXaTltExecuter() {
+    public XaTopicLocalTransactionExecuter defaultXatltExecuter() {
         return new DefaultXaTltExecuterImpl();
     }
 
     @Override
-    public void afterPropertiesSet() {
+    public void afterPropertiesSet() throws IOException {
         Map<String, XaTopicLocalTransactionExecuter> executerIdMap = new ConcurrentHashMap<>(2);
         this.executerMap.forEach((k, v) -> executerIdMap.put(v.getLocalTransactionExecuterId(), v));
         XaTopicPublisherExecuteStrategy.setExecuterMap(executerIdMap);
@@ -157,8 +160,8 @@ public class ApacheRocketMqAutoConfigure implements InitializingBean {
             if (pubItem.getRetryTimesWhenSendFailed() != null) {
                 producer.setRetryTimesWhenSendFailed(pubItem.getRetryTimesWhenSendFailed());
             }
-            if (pubItem.getRetryanotherbrokerwhennotstoreok() != null) {
-                producer.setRetryAnotherBrokerWhenNotStoreOK(pubItem.getRetryanotherbrokerwhennotstoreok());
+            if (pubItem.getRetryAnotherBrokerWhenNotStoreOK() != null) {
+                producer.setRetryAnotherBrokerWhenNotStoreOK(pubItem.getRetryAnotherBrokerWhenNotStoreOK());
             }
 
             BeanArgBuilder beanArgBuilder = new BeanArgBuilder();
@@ -185,7 +188,7 @@ public class ApacheRocketMqAutoConfigure implements InitializingBean {
         }
     }
 
-    private void topicSubAdminService() {
+    private void topicSubAdminService() throws IOException {
         if (listenerMap == null || listenerMap.isEmpty()) {
             logger.info("没有消息监听者service对象, 不初始化消息消费者对象");
             return;
@@ -212,6 +215,7 @@ public class ApacheRocketMqAutoConfigure implements InitializingBean {
 
             BeanArgBuilder beanArgBuilder = new BeanArgBuilder();
             beanArgBuilder.setConstructorArgs(new Object[]{consumer, subItem.getBeanName()});
+            // start 方法在MqUtil.setListenerAndStartSub里面调用了
             beanArgBuilder.setDestoryMethodName("close");
             BeanRegistrarUtil.registerBean(defaultListableBeanFactory,
                     subItem.getBeanName(), ApacheSimpleRocketMqSubscriber.class, beanArgBuilder);

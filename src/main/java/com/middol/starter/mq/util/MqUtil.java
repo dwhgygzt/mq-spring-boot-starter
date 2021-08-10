@@ -3,6 +3,7 @@ package com.middol.starter.mq.util;
 import com.middol.starter.mq.service.TopicListener;
 import com.middol.starter.mq.service.TopicSubscriber;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class MqUtil {
     public static void setListenerAndStartSub(
             String subscriberBeanName,
             TopicSubscriber subscriber,
-            Map<String, List<TopicListener>> listenerMapBySubBeanName) {
+            Map<String, List<TopicListener>> listenerMapBySubBeanName) throws IOException {
 
         List<TopicListener> listeners = listenerMapBySubBeanName.get(subscriberBeanName);
         if (listeners == null || listeners.isEmpty()) {

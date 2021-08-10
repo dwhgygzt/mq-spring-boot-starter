@@ -1,5 +1,7 @@
 package com.middol.starter.mq.service;
 
+import java.io.IOException;
+
 /**
  * MQ消费者
  * 订阅（subscribe）模式.
@@ -20,13 +22,13 @@ public interface TopicSubscriber extends Admin {
      *                      如果subExpression等于null或者*，则表示全部订阅
      * @param listener      消息回调监听器
      */
-    void subscribe(String topic, String tagExpression, TopicListener listener);
+    void subscribe(String topic, String tagExpression, TopicListener listener) throws IOException;
 
     /**
      * 取消某个topic订阅
      *
      * @param topicName 要取消的主题.
      */
-    void unsubscribe(String topicName);
+    void unsubscribe(String topicName) throws IOException;
 
 }

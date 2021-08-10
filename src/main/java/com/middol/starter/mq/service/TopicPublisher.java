@@ -9,13 +9,12 @@ import com.middol.starter.mq.pojo.TopicMessageSendResult;
  *
  * @author <a href="mailto:guzhongtao@middol.com">guzhongtao</a>
  */
-public interface TopicPublisher extends Admin {
+public interface TopicPublisher extends Admin{
 
     /**
      * 同步推送消息
      *
      * @param topicMessage 消息对象
-     * @return TopicMessageSendResult
      */
     TopicMessageSendResult publish(TopicMessage topicMessage);
 
