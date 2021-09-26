@@ -47,7 +47,7 @@
 ```yaml
 
 ########################## Rabbitmq测试 ########################################
-middol:
+guzt:
   mq:
      amqp:
        rabbitmq:
@@ -259,7 +259,7 @@ sendMsgTimeoutMillis 和  messageType 和 checkImmunityTimeInSeconds 属性是ro
 ```yaml
 
 ########################## RocketMQ测试 ########################################
-middol:
+guzt:
   mq:
      aliyun:
        rocketmq:
@@ -362,3 +362,89 @@ https://help.aliyun.com/document_detail/43523.html?spm=a2c4g.11186623.6.731.3009
 - rocketmq 默认为集群消息，建议为集群消费模式，本组件暂没有支持广播消费
 - 一个group组下的消费者负载均衡方式消费同一个topic消息
 - 每一个消费者可以订阅多个topic消息
+
+# 消费失败重试
+消费者配置中有 最大重试次数配置 maxRetryCount 默认 3次 , 如果是rabbitmq 则还可以配置每次失败后下次消费的时间间隔 retryConsumIntervalSeconds 
+
+
+```yaml
+
+ subscribers:
+   - {beanName: subscriberService1, exchangeName: topic_pay_test, groupId: group1, maxRetryCount: 4, retryConsumIntervalSeconds: 50}
+   - {beanName: subscriberService2, exchangeName: topic_pay_test2, groupId: group2, maxRetryCount: 8}
+
+```
+
+如果尝试了最大次数后依然没有被消费成功，则会将消息推送到接口 RetryConsumFailHandler 上
+
+```java
+
+package com.guzt.starter.mq.service;
+
+
+import com.guzt.starter.mq.pojo.Message;
+
+/**
+ * MQ消费者,尝试了最大次数后失败时的处理者
+ *
+ * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
+ */
+public interface RetryConsumFailHandler {
+
+    /**
+     * 处理
+     *
+     * @param message 消费失败的消息
+     */
+    void handle(Message message);
+}
+
+```
+
+默认有实现，就是直接打印错误日志，然后消费提交，你可以覆盖此接口实现自己的业务逻辑。
+```java
+package com.guzt.starter.mq.service.impl;
+
+import com.guzt.starter.mq.pojo.Message;
+import com.guzt.starter.mq.service.RetryConsumFailHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * MQ消费者,尝试了最大次数后失败时的处理者
+ *
+ * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
+ */
+public class DefaultRetryConsumFailHandler implements RetryConsumFailHandler {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Override
+    public void handle(Message message) {
+        logger.debug("MQ消费者,尝试了最大次数后失败时的处理方法， 你可以覆盖DefaultRetryConsumFailHandler中的方法，RetryConsumFailHandler： messageId={}", message.getMessageId());
+    }
+}
+
+```
+
+如果你要覆盖此方法，变成自己的业务逻辑，只需在你的业务方法中自行实现接口 RetryConsumFailHandler
+
+```java
+package com.xxx.mybusiness.mq;
+
+import com.guzt.starter.mq.pojo.Message;
+import com.guzt.starter.mq.service.RetryConsumFailHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Service
+public class MyRetryConsumFailHandler implements RetryConsumFailHandler {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Override
+    public void handle(Message message) {
+       // 这里实现你的业务逻辑
+       mailService.failWarn(message);
+    }
+}
+
+```
