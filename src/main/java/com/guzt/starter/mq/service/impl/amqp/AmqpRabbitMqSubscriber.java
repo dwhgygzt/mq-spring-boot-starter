@@ -106,8 +106,8 @@ public class AmqpRabbitMqSubscriber implements TopicSubscriber {
         // 申明重试队列
         Map<String, Object> arguments2 = new HashMap<>(4);
         arguments2.put(X_DEAD_LETTER_EXCHANGE, exchangeName);
-        channel.queueDeclare(RETRY_LETTER_FIX + groupId, true, false, false, arguments2);
-        channel.queueBind(RETRY_LETTER_FIX + groupId, RETRY_LETTER_FIX + exchangeName, "#");
+        channel.queueDeclare(RETRY_LETTER_FIX + "QUE-" + exchangeName, true, false, false, arguments2);
+        channel.queueBind(RETRY_LETTER_FIX + "QUE-" + exchangeName, RETRY_LETTER_FIX + exchangeName, "#");
 
         //--------------队列绑定交换机 begin ----------------------
         if (tagExpression == null) {
