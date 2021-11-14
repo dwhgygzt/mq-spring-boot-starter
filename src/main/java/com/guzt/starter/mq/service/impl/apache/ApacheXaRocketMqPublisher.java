@@ -50,6 +50,7 @@ public class ApacheXaRocketMqPublisher implements XaTopicPublisher {
         message.putUserProperty(XaTopicMessage.LOCALTRANSACTION_EXECUTERID_KEY, topicMessage.getLocalTransactionExecuterId());
         SendResult sendResult;
         try {
+            // 本地事务执行器在初始化Bean的时候指定了 请查看 ApacheRocketMqAutoConfigure # topicPubAdminService()
             sendResult = producer.sendMessageInTransaction(message, businessParam);
         } catch (Exception e) {
             throw new TopicMqException("ApacheRocketMq 发送异常 ", message.getTopic(), e);

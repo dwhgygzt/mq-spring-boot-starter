@@ -1,5 +1,6 @@
 package com.guzt.starter.mq.config;
 
+import com.guzt.starter.mq.pojo.MessageType;
 import com.guzt.starter.mq.properties.amqp.AmqpRabbitMqProperties;
 import com.guzt.starter.mq.properties.amqp.publisher.RabbitMqPubProperties;
 import com.guzt.starter.mq.properties.amqp.subscriber.RabbitMqSubProperties;
@@ -12,6 +13,7 @@ import com.guzt.starter.mq.service.impl.DefaultTopicListenerImpl;
 import com.guzt.starter.mq.service.impl.DefaultXaTLTExecuterImpl;
 import com.guzt.starter.mq.service.impl.amqp.AmqpRabbitMqPublisher;
 import com.guzt.starter.mq.service.impl.amqp.AmqpRabbitMqSubscriber;
+import com.guzt.starter.mq.service.impl.amqp.AmqpXaRabbitMqPublisher;
 import com.guzt.starter.mq.util.BeanArgBuilder;
 import com.guzt.starter.mq.util.BeanRegistrarUtil;
 import com.guzt.starter.mq.util.MqUtil;
@@ -30,6 +32,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -162,8 +165,15 @@ public class AmqpRabbitMqAutoConfigure implements InitializingBean {
             beanArgBuilder.setConstructorArgs(new Object[]{connection, pubItem});
             beanArgBuilder.setInitMethodName("start");
             beanArgBuilder.setDestoryMethodName("close");
-            BeanRegistrarUtil.registerBean(
-                    defaultListableBeanFactory, pubItem.getBeanName(), AmqpRabbitMqPublisher.class, beanArgBuilder);
+            // 事务消息检查设置
+            if (StringUtils.hasText(pubItem.getMessageType())
+                    && pubItem.getMessageType().toUpperCase().equals(MessageType.TRANSACTION.getValue())) {
+                BeanRegistrarUtil.registerBean(
+                        defaultListableBeanFactory, pubItem.getBeanName(), AmqpXaRabbitMqPublisher.class, beanArgBuilder);
+            } else {
+                BeanRegistrarUtil.registerBean(
+                        defaultListableBeanFactory, pubItem.getBeanName(), AmqpRabbitMqPublisher.class, beanArgBuilder);
+            }
         }
     }
 

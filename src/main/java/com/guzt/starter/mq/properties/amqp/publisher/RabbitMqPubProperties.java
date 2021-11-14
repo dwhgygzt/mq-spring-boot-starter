@@ -37,6 +37,21 @@ public class RabbitMqPubProperties {
      */
     private Integer asyncKeepAliveSeconds = 10;
 
+    /**
+     * 发送消息的类型 SIMPLE 简单类型  TRANSACTION 事务类型
+     */
+    private String messageType;
+
+    /**
+     * 【专门针对XA事务消息】设置事务消息的回查间隔时间
+     */
+    private Integer checkImmunityTimeInSeconds = 10;
+
+    /**
+     * 【专门针对XA事务消息】最大回查失败后重试次数 默认10次
+     */
+    private Integer checkImmunityMaxCount = 10;
+
 
     public String getBeanName() {
         return beanName;
@@ -84,5 +99,29 @@ public class RabbitMqPubProperties {
 
     public void setAsyncKeepAliveSeconds(Integer asyncKeepAliveSeconds) {
         this.asyncKeepAliveSeconds = asyncKeepAliveSeconds;
+    }
+
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
+    }
+
+    public Integer getCheckImmunityTimeInSeconds() {
+        return checkImmunityTimeInSeconds;
+    }
+
+    public void setCheckImmunityTimeInSeconds(Integer checkImmunityTimeInSeconds) {
+        this.checkImmunityTimeInSeconds = checkImmunityTimeInSeconds;
+    }
+
+    public Integer getCheckImmunityMaxCount() {
+        return checkImmunityMaxCount;
+    }
+
+    public void setCheckImmunityMaxCount(Integer checkImmunityMaxCount) {
+        this.checkImmunityMaxCount = checkImmunityMaxCount;
     }
 }

@@ -199,12 +199,12 @@ public class AmqpRabbitMqPublisher implements TopicPublisher {
 
     @Override
     public void close() {
-        logger.info("【MQ】AmqpRabbitMqPublisher[{}] , group[{}] close...", beanName, groupId);
+        logger.info("【MQ】AmqpRabbitMqPublisher[{}] , exchangeName[{}] close...", beanName, exchangeName);
         try {
             channel.close();
             connection.close();
         } catch (IOException | TimeoutException e) {
-            logger.error("【MQ】AmqpRabbitMqPublisher[{}] , group[{}] close Exception", beanName, groupId, e);
+            logger.error("【MQ】AmqpRabbitMqPublisher[{}] , exchangeName[{}] close Exception", beanName, exchangeName, e);
         }
     }
 
