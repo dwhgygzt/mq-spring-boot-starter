@@ -27,7 +27,7 @@
 
         <alibaba.amqp.version>1.0.5</alibaba.amqp.version>
         <apache.rocketmq.version>4.7.0</apache.rocketmq.version>
-        <amqp.client.version>5.10.0</amqp.client.version>
+        <amqp.client.version>5.18.0</amqp.client.version>
         <aliyun.ons.client.version>1.8.4.Final</aliyun.ons.client.version>
     </properties>
 
