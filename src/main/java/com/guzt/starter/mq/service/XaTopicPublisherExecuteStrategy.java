@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * XaTopicLocalTransactionExecuter 的执行策略
- * https://help.aliyun.com/document_detail/29548.html?spm=a2c4g.11186623.6.598.4b9e7e80WgS7Fs
+ * <a href="https://help.aliyun.com/document_detail/29548.html?spm=a2c4g.11186623.6.598.4b9e7e80WgS7Fs">...</a>
  *
  * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
  */

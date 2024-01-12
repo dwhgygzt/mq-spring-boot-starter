@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unused")
 public class AliyunSimpleRocketMqSubscriber implements TopicSubscriber {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 阿里云 rocketMq消费服务
@@ -66,17 +66,18 @@ public class AliyunSimpleRocketMqSubscriber implements TopicSubscriber {
     protected Action failureFrequency(TopicMessage topicMessage) {
         String messageUniqueId = topicMessage.getTopicName() + "_" + topicMessage.getTags() + "_" + topicMessage.getMessageId();
         int retryCnt = topicMessage.getCurrentRetyConsumCount();
-        if (retryCnt >= rocketMqSubProperties.getMaxRetryCount()) {
-            logger.info("消息超过最大重新投递次数{} ，直接消费完成！ topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
-                    rocketMqSubProperties.getMaxRetryCount(), topicMessage.getTopicName(),
-                    topicMessage.getMessageId(), topicMessage.getBussinessKey(), topicMessage.getTags(), rocketMqSubProperties.getGroupId());
-            retryConsumFailHandler.handle(topicMessage);
-            return Action.CommitMessage;
-        } else {
-            logger.info("消息重新投递.... topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
+        int maxRetryCount = rocketMqSubProperties.getMaxRetryCount();
+        if (retryCnt < maxRetryCount) {
+            logger.debug("消息重新投递.... topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
                     topicMessage.getTopicName(), topicMessage.getMessageId(), topicMessage.getBussinessKey(),
                     topicMessage.getTags(), rocketMqSubProperties.getGroupId());
             return Action.ReconsumeLater;
+        } else {
+            logger.debug("消息超过最大重新投递次数{} ，直接消费完成！ topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
+                    maxRetryCount, topicMessage.getTopicName(), topicMessage.getMessageId(), topicMessage.getBussinessKey(),
+                    topicMessage.getTags(), rocketMqSubProperties.getGroupId());
+            retryConsumFailHandler.handle(topicMessage);
+            return Action.CommitMessage;
         }
     }
 
@@ -97,13 +98,13 @@ public class AliyunSimpleRocketMqSubscriber implements TopicSubscriber {
 
     @Override
     public void start() {
-        logger.info("【MQ】AliyunSimpleRocketMqSubscriber[" + beanName + "] start...");
+        logger.debug("【MQ】AliyunSimpleRocketMqSubscriber[" + beanName + "] start...");
         consumer.start();
     }
 
     @Override
     public void close() {
-        logger.info("【MQ】AliyunSimpleRocketMqSubscriber[" + beanName + "] close...");
+        logger.debug("【MQ】AliyunSimpleRocketMqSubscriber[" + beanName + "] close...");
         consumer.shutdown();
     }
 

@@ -5,12 +5,13 @@ import java.io.IOException;
 /**
  * MQ消费者
  * 订阅（subscribe）模式.
- * 订阅关系一致 https://help.aliyun.com/document_detail/43523.html?spm=a2c4g.11186623.6.734.60b94c07Uwhsky
+ * 订阅关系一致 <a href="https://help.aliyun.com/document_detail/43523.html?spm=a2c4g.11186623.6.734.60b94c07Uwhsky">...</a>
  * 1.订阅的 Topic 必须一致
  * 2.订阅的 Topic 中的 Tag 必须一致
  *
  * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
  */
+@SuppressWarnings("unused")
 public interface TopicSubscriber extends Admin {
 
     /**

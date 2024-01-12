@@ -4,13 +4,7 @@ import com.guzt.starter.mq.pojo.MessageType;
 import com.guzt.starter.mq.properties.amqp.AmqpRabbitMqProperties;
 import com.guzt.starter.mq.properties.amqp.publisher.RabbitMqPubProperties;
 import com.guzt.starter.mq.properties.amqp.subscriber.RabbitMqSubProperties;
-import com.guzt.starter.mq.service.RetryConsumFailHandler;
-import com.guzt.starter.mq.service.TopicListener;
-import com.guzt.starter.mq.service.XaTopicLocalTransactionExecuter;
-import com.guzt.starter.mq.service.XaTopicPublisherExecuteStrategy;
-import com.guzt.starter.mq.service.impl.DefaultRetryConsumFailHandler;
-import com.guzt.starter.mq.service.impl.DefaultTopicListenerImpl;
-import com.guzt.starter.mq.service.impl.DefaultXaTLTExecuterImpl;
+import com.guzt.starter.mq.service.*;
 import com.guzt.starter.mq.service.impl.amqp.AmqpRabbitMqPublisher;
 import com.guzt.starter.mq.service.impl.amqp.AmqpRabbitMqSubscriber;
 import com.guzt.starter.mq.service.impl.amqp.AmqpXaRabbitMqPublisher;
@@ -25,12 +19,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
@@ -51,9 +44,10 @@ import java.util.concurrent.TimeoutException;
 @ConditionalOnClass({Channel.class})
 @ConditionalOnProperty(prefix = "guzt.mq.amqp.rabbitmq", value = "enable", havingValue = "true")
 @EnableConfigurationProperties({AmqpRabbitMqProperties.class})
+@AutoConfigureAfter(CommonMqAutoConfigure.class)
 public class AmqpRabbitMqAutoConfigure implements InitializingBean {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Resource
     private AmqpRabbitMqProperties amqpRabbitMqProperties;
@@ -109,28 +103,6 @@ public class AmqpRabbitMqAutoConfigure implements InitializingBean {
         this.connectionFactory = connectionFactory;
     }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public RetryConsumFailHandler defaultRetryConsumFailHandler() {
-        return new DefaultRetryConsumFailHandler();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public TopicListener defaultTopicListener() {
-        return new DefaultTopicListenerImpl();
-    }
-
-    /**
-     * rabbitmq 本组件暂时没有实现类似于rocketmq的事务机制
-     * 请勿使用 XaTopicLocalTransactionExecuter
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public XaTopicLocalTransactionExecuter defaultXatltExecuter() {
-        return new DefaultXaTLTExecuterImpl();
-    }
-
     /**
      * rabbitmq 本组件暂时没有实现类似于rocketmq的事务机制
      * 请勿使用 XaTopicLocalTransactionExecuter
@@ -150,7 +122,7 @@ public class AmqpRabbitMqAutoConfigure implements InitializingBean {
     private void topicPubAdminService() throws IOException, TimeoutException {
         List<RabbitMqPubProperties> properties = amqpRabbitMqProperties.getPublishers();
         if (properties == null || properties.isEmpty()) {
-            logger.info("没有配置消息发布者的属性, 不初始化消息发布者对象");
+            logger.debug("没有配置消息发布者的属性, 不初始化消息发布者对象");
             return;
         }
         //获取BeanFactory
@@ -162,15 +134,16 @@ public class AmqpRabbitMqAutoConfigure implements InitializingBean {
             Connection connection = connectionFactory.newConnection();
 
             BeanArgBuilder beanArgBuilder = new BeanArgBuilder();
-            beanArgBuilder.setConstructorArgs(new Object[]{connection, pubItem});
             beanArgBuilder.setInitMethodName("start");
             beanArgBuilder.setDestoryMethodName("close");
             // 事务消息检查设置
             if (StringUtils.hasText(pubItem.getMessageType())
                     && pubItem.getMessageType().toUpperCase().equals(MessageType.TRANSACTION.getValue())) {
+                beanArgBuilder.setConstructorArgs(new Object[]{connection, pubItem, applicationContext.getBean(XaTopicPublishChecker.class)});
                 BeanRegistrarUtil.registerBean(
                         defaultListableBeanFactory, pubItem.getBeanName(), AmqpXaRabbitMqPublisher.class, beanArgBuilder);
             } else {
+                beanArgBuilder.setConstructorArgs(new Object[]{connection, pubItem});
                 BeanRegistrarUtil.registerBean(
                         defaultListableBeanFactory, pubItem.getBeanName(), AmqpRabbitMqPublisher.class, beanArgBuilder);
             }
@@ -179,13 +152,13 @@ public class AmqpRabbitMqAutoConfigure implements InitializingBean {
 
     private void topicSubAdminService() throws IOException, TimeoutException {
         if (listenerMap == null || listenerMap.isEmpty()) {
-            logger.info("没有消息监听者service对象, 不初始化消息消费者对象");
+            logger.debug("没有消息监听者service对象, 不初始化消息消费者对象");
             return;
         }
 
         List<RabbitMqSubProperties> properties = amqpRabbitMqProperties.getSubscribers();
         if (properties == null || properties.isEmpty()) {
-            logger.info("没有配置消息消息者的属性, 不初始化消息消费者对象");
+            logger.debug("【AmqpRabbitMq】没有配置消息消息者的属性, 不初始化消息消费者对象");
             return;
         }
         //获取BeanFactory

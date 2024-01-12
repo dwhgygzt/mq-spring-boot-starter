@@ -5,6 +5,7 @@ package com.guzt.starter.mq.service;
  *
  * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
  */
+@SuppressWarnings("unused")
 public interface Admin {
     /**
      * 检查服务是否已经启动.

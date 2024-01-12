@@ -1,4 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+                    com.guzt.starter.mq.config.CommonMqAutoConfigure,\
                     com.guzt.starter.mq.config.AliyunRocketMqAutoConfigure,\
                     com.guzt.starter.mq.config.ApacheRocketMqAutoConfigure,\
                     com.guzt.starter.mq.config.AmqpRabbitMqAutoConfigure

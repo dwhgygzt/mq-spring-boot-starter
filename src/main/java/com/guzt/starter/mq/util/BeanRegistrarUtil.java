@@ -17,6 +17,7 @@ import static org.springframework.util.StringUtils.hasText;
  *
  * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
  */
+@SuppressWarnings("unused")
 public class BeanRegistrarUtil {
 
     private static final Log log = LogFactory.getLog(BeanRegistrarUtil.class);
@@ -28,19 +29,19 @@ public class BeanRegistrarUtil {
      * @param beanType               the type of bean
      * @param beanName               the name of bean
      * @param beanArgBuilder         the args of bean
-     * @return if it's a first time to register, return <code>true</code>, or <code>false</code>
      */
-    public static boolean registerBean(
+    public static void registerBean(
             BeanDefinitionRegistry beanDefinitionRegistry, String beanName, Class<?> beanType, BeanArgBuilder beanArgBuilder) {
 
         if (beanDefinitionRegistry.containsBeanDefinition(beanName)) {
-            return false;
+            return;
         }
 
         // 构造函数，初始化 、销毁方法设置
-        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(beanType);
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanType);
         if (beanArgBuilder != null) {
-            if (beanArgBuilder.getConstructorArgs() != null && beanArgBuilder.getConstructorArgs().length > 0) {
+            if (beanArgBuilder.getConstructorArgs() != null) {
+                beanArgBuilder.getConstructorArgs();
                 for (Object object : beanArgBuilder.getConstructorArgs()) {
                     beanDefinitionBuilder.addConstructorArgValue(object);
                 }
@@ -58,12 +59,11 @@ public class BeanRegistrarUtil {
 
         if (log.isInfoEnabled()) {
             if (beanDefinition instanceof RootBeanDefinition) {
-                log.info("The Infrastructure bean definition [" + beanDefinition
+                log.debug("The Infrastructure bean definition [" + beanDefinition
                         + "with name [" + beanName + "] has been registered.");
             }
         }
 
-        return true;
     }
 
     /**

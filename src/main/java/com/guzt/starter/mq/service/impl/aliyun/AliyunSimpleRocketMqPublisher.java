@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unused")
 public class AliyunSimpleRocketMqPublisher implements TopicPublisher {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     /**
      * 阿里云 rocketmq producer
      */
@@ -95,13 +95,13 @@ public class AliyunSimpleRocketMqPublisher implements TopicPublisher {
 
     @Override
     public void start() {
-        logger.info("【MQ】AliyunSimpleRocketMqPublisher["+beanName+"] start...");
+        logger.debug("【MQ】AliyunSimpleRocketMqPublisher["+beanName+"] start...");
         producer.start();
     }
 
     @Override
     public void close() {
-        logger.info("【MQ】AliyunSimpleRocketMqPublisher[" + beanName + "] close...");
+        logger.debug("【MQ】AliyunSimpleRocketMqPublisher[" + beanName + "] close...");
         producer.shutdown();
     }
 

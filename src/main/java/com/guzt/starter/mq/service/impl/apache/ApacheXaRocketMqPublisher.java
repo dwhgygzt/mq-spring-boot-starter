@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("unused")
 public class ApacheXaRocketMqPublisher implements XaTopicPublisher {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     /**
      * apache rocketmq producer
      */
@@ -72,7 +72,7 @@ public class ApacheXaRocketMqPublisher implements XaTopicPublisher {
 
     @Override
     public void start() {
-        logger.info("【MQ】ApacheXaRocketMqPublisher[" + beanName + "] start...");
+        logger.debug("【MQ】ApacheXaRocketMqPublisher[" + beanName + "] start...");
         try {
             producer.start();
             isStarted = true;
@@ -83,7 +83,7 @@ public class ApacheXaRocketMqPublisher implements XaTopicPublisher {
 
     @Override
     public void close() {
-        logger.info("【MQ】ApacheXaRocketMqPublisher[" + beanName + "] close...");
+        logger.debug("【MQ】ApacheXaRocketMqPublisher[" + beanName + "] close...");
         producer.shutdown();
     }
 

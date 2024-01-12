@@ -22,7 +22,7 @@ public enum PublishType {
      */
     CONSUM_FAIL_RETRY("CONSUM_FAIL_RETRY");
 
-    private String value;
+    private final String value;
 
     public String getValue() {
         return this.value;

@@ -5,6 +5,7 @@ package com.guzt.starter.mq.properties.apache.publisher;
  *
  * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
  */
+@SuppressWarnings("unused")
 public class ApacheMqPubProperties {
 
     /**

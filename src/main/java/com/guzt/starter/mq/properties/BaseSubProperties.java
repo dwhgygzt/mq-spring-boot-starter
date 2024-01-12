@@ -8,9 +8,9 @@ package com.guzt.starter.mq.properties;
 public class BaseSubProperties {
 
     /**
-     * 最大失败重试消费次数 默认10次
+     * 最大失败重试消费次数 默认3次
      */
-    private Integer maxRetryCount = 10;
+    private Integer maxRetryCount = 3;
 
 
     public Integer getMaxRetryCount() {

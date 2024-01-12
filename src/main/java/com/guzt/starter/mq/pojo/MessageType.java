@@ -17,7 +17,7 @@ public enum MessageType {
      */
     TRANSACTION("TRANSACTION");
 
-    private String value;
+    private final String value;
 
     public String getValue(){
         return this.value;

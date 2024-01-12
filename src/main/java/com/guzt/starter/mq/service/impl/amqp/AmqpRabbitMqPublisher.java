@@ -32,7 +32,7 @@ import java.util.concurrent.*;
 @SuppressWarnings("unused")
 public class AmqpRabbitMqPublisher implements TopicPublisher {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 
     static SecureRandom secureRandom = new SecureRandom();
@@ -70,7 +70,7 @@ public class AmqpRabbitMqPublisher implements TopicPublisher {
 
         // routingKey 设置
         String routingKey = topicMessage.getTags();
-        if (StringUtils.isEmpty(routingKey)) {
+        if (!StringUtils.hasText(routingKey)) {
             routingKey = "*";
             topicMessage.setTags(routingKey);
         }
@@ -176,7 +176,7 @@ public class AmqpRabbitMqPublisher implements TopicPublisher {
             return;
         }
 
-        logger.info("【MQ】AmqpRabbitMqPublisher[{}] , group[{}] start...", beanName, groupId);
+        logger.debug("【MQ】AmqpRabbitMqPublisher[{}] , group[{}] start...", beanName, groupId);
         try {
             this.channel = connection.createChannel();
             /*
@@ -199,7 +199,7 @@ public class AmqpRabbitMqPublisher implements TopicPublisher {
 
     @Override
     public void close() {
-        logger.info("【MQ】AmqpRabbitMqPublisher[{}] , exchangeName[{}] close...", beanName, exchangeName);
+        logger.debug("【MQ】AmqpRabbitMqPublisher[{}] , exchangeName[{}] close...", beanName, exchangeName);
         try {
             channel.close();
             connection.close();

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 
@@ -27,7 +26,7 @@ import java.util.concurrent.TimeoutException;
 @SuppressWarnings("unused")
 public class AmqpRabbitMqSubscriber implements TopicSubscriber {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 死信队列 交换机标识符.
@@ -47,7 +46,7 @@ public class AmqpRabbitMqSubscriber implements TopicSubscriber {
     /**
      * groupId 是队列的名称，tag为队列可接受那些消息的 routdingKey
      */
-    private Map<String, List<String>> queueTagBindMap = new HashMap<>(4);
+    private final Map<String, List<String>> queueTagBindMap = new HashMap<>(4);
 
     Channel channel;
 
@@ -154,12 +153,9 @@ public class AmqpRabbitMqSubscriber implements TopicSubscriber {
                 String exchange = envelope.getExchange();
                 //获取消息ID
                 long deliveryTag = envelope.getDeliveryTag();
-                //获取消息信息
-                String message = new String(body, StandardCharsets.UTF_8);
-
                 if (logger.isDebugEnabled()) {
-                    logger.debug("consumerTag={}, routingKey={}, exchange={}, deliveryTag={}, message={}",
-                            consumerTag, routingKey, exchange, deliveryTag, message);
+                    logger.debug("接收到消息 consumerTag={}, routingKey={}, exchange={}, deliveryTag={}, bodyLength={}",
+                            consumerTag, routingKey, exchange, deliveryTag, body.length);
                 }
                 MessageStatus messageStatus;
                 TopicMessage topicMessage = new TopicMessage();
@@ -180,8 +176,8 @@ public class AmqpRabbitMqSubscriber implements TopicSubscriber {
                     topicMessage.setTopicName(topic);
                     messageStatus = listener.subscribe(topicMessage);
                 } else {
-                    logger.warn("【MQ】AmqpRabbitMqSublisher[{}] 消息接受错误，接受到非 topicName={} 的消息, 该消息的topicName是{}, routingKey={}, message={}",
-                            beanName, topic, msgTopic, routingKey, message);
+                    logger.warn("【MQ】AmqpRabbitMqSublisher[{}] 消息接受错误，接受到非 topicName={} 的消息, 该消息的topicName是{}, routingKey={}",
+                            beanName, topic, msgTopic, routingKey);
                     messageStatus = MessageStatus.CommitMessage;
                 }
                 try {
@@ -206,17 +202,19 @@ public class AmqpRabbitMqSubscriber implements TopicSubscriber {
     protected void failureFrequency(TopicMessage topicMessage) throws IOException {
         String messageUniqueId = topicMessage.getTopicName() + "_" + topicMessage.getTags() + "_" + topicMessage.getMessageId();
         int retryCnt = topicMessage.getCurrentRetyConsumCount();
-        if (retryCnt >= rabbitMqSubProperties.getMaxRetryCount()) {
-            logger.info("当前消费第{}次，消息超过最大重新投递次数{} ，直接消费完成！ topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
-                    retryCnt, rabbitMqSubProperties.getMaxRetryCount(), topicMessage.getTopicName(), topicMessage.getMessageId(),
+        int maxRetryCnt = rabbitMqSubProperties.getMaxRetryCount();
+        if (retryCnt < maxRetryCnt) {
+            logger.debug("当前消费失败第{}次，消息设置最大重新投递次数{}，消息重新给重试队列等待重投.... topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
+                    retryCnt + 1, maxRetryCnt, topicMessage.getTopicName(), topicMessage.getMessageId(),
                     topicMessage.getBussinessKey(), topicMessage.getTags(), groupId);
-            retryConsumFailHandler.handle(topicMessage);
-        } else {
-            logger.info("当前消费第{}次，消息重新给重试队列等待重投.... topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
-                    retryCnt, topicMessage.getTopicName(), topicMessage.getMessageId(), topicMessage.getBussinessKey(), topicMessage.getTags(), groupId);
             AmqpRabbitMqPublisher.publishTopicMessage(
                     channel, RETRY_LETTER_FIX + exchangeName, topicMessage,
                     PublishType.CONSUM_FAIL_RETRY.getValue(), rabbitMqSubProperties.getRetryConsumIntervalSeconds() * 1000);
+        } else {
+            logger.debug("当前消费失败第{}次，消息超过最大重新投递次数{} ，直接消费完成！ topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
+                    retryCnt + 1, maxRetryCnt, topicMessage.getTopicName(), topicMessage.getMessageId(),
+                    topicMessage.getBussinessKey(), topicMessage.getTags(), groupId);
+            retryConsumFailHandler.handle(topicMessage);
         }
     }
 
@@ -244,7 +242,7 @@ public class AmqpRabbitMqSubscriber implements TopicSubscriber {
             return;
         }
 
-        logger.info("【MQ】AmqpRabbitMqSubscriber[" + beanName + "] start...");
+        logger.debug("【MQ】AmqpRabbitMqSubscriber[" + beanName + "] start...");
         try {
             this.channel = connection.createChannel();
             /*
@@ -270,7 +268,7 @@ public class AmqpRabbitMqSubscriber implements TopicSubscriber {
 
     @Override
     public void close() {
-        logger.info("【MQ】AmqpRabbitMqSublisher[" + beanName + "] close...");
+        logger.debug("【MQ】AmqpRabbitMqSublisher[" + beanName + "] close...");
         try {
             channel.close();
             connection.close();

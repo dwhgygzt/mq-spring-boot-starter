@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unused")
 public class ApacheSimpleRocketMqPublisher implements TopicPublisher {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     /**
      * apache rocketmq producer
      */
@@ -133,7 +133,7 @@ public class ApacheSimpleRocketMqPublisher implements TopicPublisher {
 
     @Override
     public void start() {
-        logger.info("【MQ】ApacheSimpleRocketMqPublisher[" + beanName + "] start...");
+        logger.debug("【MQ】ApacheSimpleRocketMqPublisher[" + beanName + "] start...");
         try {
             producer.start();
             isStarted = true;
@@ -144,7 +144,7 @@ public class ApacheSimpleRocketMqPublisher implements TopicPublisher {
 
     @Override
     public void close() {
-        logger.info("【MQ】ApacheSimpleRocketMqPublisher[" + beanName + "] close...");
+        logger.debug("【MQ】ApacheSimpleRocketMqPublisher[" + beanName + "] close...");
         producer.shutdown();
     }
 

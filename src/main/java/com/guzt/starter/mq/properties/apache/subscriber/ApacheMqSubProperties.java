@@ -7,6 +7,7 @@ import com.guzt.starter.mq.properties.BaseSubProperties;
  *
  * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
  */
+@SuppressWarnings("unused")
 public class ApacheMqSubProperties extends BaseSubProperties {
 
     /**

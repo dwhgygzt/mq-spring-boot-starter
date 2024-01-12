@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
  */
 public class DefaultTopicListenerImpl implements TopicListener {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public static String DEFAULT_SUBSCRIBER_BEANNAME = "default_SubscriberBeanName";
     public static String DEFAULT_TOPICNAME = "default_TopicName";

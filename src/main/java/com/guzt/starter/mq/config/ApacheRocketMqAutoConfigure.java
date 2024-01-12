@@ -10,9 +10,6 @@ import com.guzt.starter.mq.service.RetryConsumFailHandler;
 import com.guzt.starter.mq.service.TopicListener;
 import com.guzt.starter.mq.service.XaTopicLocalTransactionExecuter;
 import com.guzt.starter.mq.service.XaTopicPublisherExecuteStrategy;
-import com.guzt.starter.mq.service.impl.DefaultRetryConsumFailHandler;
-import com.guzt.starter.mq.service.impl.DefaultTopicListenerImpl;
-import com.guzt.starter.mq.service.impl.DefaultXaTLTExecuterImpl;
 import com.guzt.starter.mq.service.impl.apache.ApacheSimpleRocketMqPublisher;
 import com.guzt.starter.mq.service.impl.apache.ApacheSimpleRocketMqSubscriber;
 import com.guzt.starter.mq.service.impl.apache.ApacheXaRocketMqPublisher;
@@ -37,12 +34,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
@@ -62,9 +58,10 @@ import java.util.concurrent.*;
 @ConditionalOnClass({SendMessageContext.class})
 @ConditionalOnProperty(prefix = "guzt.mq.apache.rocketmq", value = "enable", havingValue = "true")
 @EnableConfigurationProperties({ApacheRocketMqProperties.class})
+@AutoConfigureAfter(CommonMqAutoConfigure.class)
 public class ApacheRocketMqAutoConfigure implements InitializingBean {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Resource
     private ApacheRocketMqProperties apacheRocketMqProperties;
@@ -81,24 +78,6 @@ public class ApacheRocketMqAutoConfigure implements InitializingBean {
     @Autowired
     private Map<String, XaTopicLocalTransactionExecuter> executerMap = new ConcurrentHashMap<>(2);
 
-    @Bean
-    @ConditionalOnMissingBean
-    public RetryConsumFailHandler defaultRetryConsumFailHandler() {
-        return new DefaultRetryConsumFailHandler();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public TopicListener defaultTopicListener() {
-        return new DefaultTopicListenerImpl();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public XaTopicLocalTransactionExecuter defaultXatltExecuter() {
-        return new DefaultXaTLTExecuterImpl();
-    }
-
     @Override
     public void afterPropertiesSet() throws IOException {
         Map<String, XaTopicLocalTransactionExecuter> executerIdMap = new ConcurrentHashMap<>(2);
@@ -114,7 +93,7 @@ public class ApacheRocketMqAutoConfigure implements InitializingBean {
     private void topicPubAdminService() {
         List<ApacheMqPubProperties> properties = apacheRocketMqProperties.getPublishers();
         if (properties == null || properties.isEmpty()) {
-            logger.info("没有配置消息发布者的属性, 不初始化消息发布者对象");
+            logger.debug("没有配置消息发布者的属性, 不初始化消息发布者对象");
             return;
         }
 
@@ -198,13 +177,13 @@ public class ApacheRocketMqAutoConfigure implements InitializingBean {
 
     private void topicSubAdminService() throws IOException {
         if (listenerMap == null || listenerMap.isEmpty()) {
-            logger.info("没有消息监听者service对象, 不初始化消息消费者对象");
+            logger.debug("没有消息监听者service对象, 不初始化消息消费者对象");
             return;
         }
 
         List<ApacheMqSubProperties> properties = apacheRocketMqProperties.getSubscribers();
         if (properties == null || properties.isEmpty()) {
-            logger.info("没有配置消息消息者的属性, 不初始化消息消费者对象");
+            logger.debug("【ApacheRockeMq】没有配置消息消息者的属性, 不初始化消息消费者对象");
             return;
         }
         //获取BeanFactory
@@ -267,7 +246,7 @@ public class ApacheRocketMqAutoConfigure implements InitializingBean {
         Map<String, String> userPropertiesMap = msg.getProperties();
         if (userPropertiesMap != null && !userPropertiesMap.isEmpty()) {
             Properties userProperties = new Properties();
-            userPropertiesMap.forEach(userProperties::put);
+            userProperties.putAll(userPropertiesMap);
             topicMessage.setUserProperties(userProperties);
         }
         topicMessage.setBussinessKey(msg.getKeys());

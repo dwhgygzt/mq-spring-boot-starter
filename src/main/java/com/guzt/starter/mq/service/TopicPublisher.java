@@ -9,6 +9,7 @@ import com.guzt.starter.mq.pojo.TopicMessageSendResult;
  *
  * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
  */
+@SuppressWarnings("unused")
 public interface TopicPublisher extends Admin{
 
     /**

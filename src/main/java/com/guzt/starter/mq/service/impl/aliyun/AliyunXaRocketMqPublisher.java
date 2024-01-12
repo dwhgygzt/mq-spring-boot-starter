@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("unused")
 public class AliyunXaRocketMqPublisher implements XaTopicPublisher {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     /**
      * 阿里云 rocketmq producer
      */
@@ -49,13 +49,13 @@ public class AliyunXaRocketMqPublisher implements XaTopicPublisher {
 
     @Override
     public void start() {
-        logger.info("【MQ】AliyunXaRocketMqPublisher[" + beanName + "] start...");
+        logger.debug("【MQ】AliyunXaRocketMqPublisher[" + beanName + "] start...");
         producer.start();
     }
 
     @Override
     public void close() {
-        logger.info("【MQ】AliyunXaRocketMqPublisher[" + beanName + "] close...");
+        logger.debug("【MQ】AliyunXaRocketMqPublisher[" + beanName + "] close...");
         producer.shutdown();
     }
 

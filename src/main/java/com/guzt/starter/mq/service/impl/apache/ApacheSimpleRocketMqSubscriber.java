@@ -25,7 +25,7 @@ import java.util.Properties;
 @SuppressWarnings("unused")
 public class ApacheSimpleRocketMqSubscriber implements TopicSubscriber {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 阿里云 rocketMq消费服务
@@ -65,7 +65,7 @@ public class ApacheSimpleRocketMqSubscriber implements TopicSubscriber {
             Map<String, String> userPropertiesMap = messageExt.getProperties();
             if (userPropertiesMap != null && !userPropertiesMap.isEmpty()) {
                 Properties userProperties = new Properties();
-                userPropertiesMap.forEach(userProperties::put);
+                userProperties.putAll(userPropertiesMap);
                 topicMessage.setUserProperties(userProperties);
             }
 
@@ -88,17 +88,18 @@ public class ApacheSimpleRocketMqSubscriber implements TopicSubscriber {
     protected ConsumeConcurrentlyStatus failureFrequency(TopicMessage topicMessage) {
         String messageUniqueId = topicMessage.getTopicName() + "_" + topicMessage.getTags() + "_" + topicMessage.getMessageId();
         int retryCnt = topicMessage.getCurrentRetyConsumCount();
-        if (retryCnt >= apacheMqSubProperties.getMaxRetryCount()) {
-            logger.info("消息超过最大重新投递次数{} ，直接消费完成！ topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
-                    apacheMqSubProperties.getMaxRetryCount(), topicMessage.getTopicName(),
-                    topicMessage.getMessageId(), topicMessage.getBussinessKey(), topicMessage.getTags(), apacheMqSubProperties.getGroupId());
-            retryConsumFailHandler.handle(topicMessage);
-            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-        } else {
-            logger.info("消息重新投递.... topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
+        int maxRetryCount = apacheMqSubProperties.getMaxRetryCount();
+        if (retryCnt < maxRetryCount) {
+            logger.debug("消息重新投递.... topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
                     topicMessage.getTopicName(), topicMessage.getMessageId(), topicMessage.getBussinessKey(),
                     topicMessage.getTags(), apacheMqSubProperties.getGroupId());
             return ConsumeConcurrentlyStatus.RECONSUME_LATER;
+        } else {
+            logger.debug("消息超过最大重新投递次数{} ，直接消费完成！ topicName={}, messageId={}, bussinessKey={}, routingKey={}, groupId={}",
+                    maxRetryCount, topicMessage.getTopicName(), topicMessage.getMessageId(), topicMessage.getBussinessKey(),
+                    topicMessage.getTags(), apacheMqSubProperties.getGroupId());
+            retryConsumFailHandler.handle(topicMessage);
+            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         }
     }
 
@@ -119,7 +120,7 @@ public class ApacheSimpleRocketMqSubscriber implements TopicSubscriber {
 
     @Override
     public void start() {
-        logger.info("【MQ】ApacheSimpleRocketMqSubscriber[" + beanName + "] start...");
+        logger.debug("【MQ】ApacheSimpleRocketMqSubscriber[" + beanName + "] start...");
         try {
             consumer.start();
             isStarted = true;
@@ -130,7 +131,7 @@ public class ApacheSimpleRocketMqSubscriber implements TopicSubscriber {
 
     @Override
     public void close() {
-        logger.info("【MQ】ApacheSimpleRocketMqSubscriber[" + beanName + "] close...");
+        logger.debug("【MQ】ApacheSimpleRocketMqSubscriber[" + beanName + "] close...");
         consumer.shutdown();
     }
 

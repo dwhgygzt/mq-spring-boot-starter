@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:gzt19881123@163.com">guzhongtao</a>
  */
 public class DefaultRetryConsumFailHandler implements RetryConsumFailHandler {
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public void handle(Message message) {
